@@ -6,13 +6,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🚗 Smart Parking Lot</h1>
+  <div id="rfid-scanner">Waiting for RFID...</div>
+
+  <div id="barrier-container">
+    <div class="barrier"></div>
+  </div>
+
+  <div id="counters">
+    <div id="vacant-count">Vacant: 0</div>
+    <div id="occupied-count">Occupied: 0</div>
+  </div>
+
   <div id="parking-lot">
-    <!-- We assume 4 slots here, adjust as needed -->
-    <div class="slot" id="slot1">1</div>
-    <div class="slot" id="slot2">2</div>
-    <div class="slot" id="slot3">3</div>
-    <div class="slot" id="slot4">4</div>
+    <div class="slot" id="slot1"></div>
+    <div class="slot" id="slot2"></div>
   </div>
 
   <script src="script.js"></script>

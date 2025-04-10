@@ -1,32 +1,42 @@
-const channelID = 'YOUR_CHANNEL_ID';  // Replace with yours
-const readAPIKey = 'YOUR_READ_API_KEY'; // Leave as "" if public
+const channelID = "2913872";
+const apiURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json`;
 
-async function fetchParkingData() {
-  const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?results=1${readAPIKey ? '&api_key=' + readAPIKey : ''}`;
+const slotElements = [
+  document.getElementById('slot1'),
+  document.getElementById('slot2'),
+];
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    const latest = data.feeds[0];
+function updateDashboard(data) {
+  const slots = [parseInt(data.field1), parseInt(data.field2)];
+  let vacant = 0, occupied = 0;
 
-    // Assuming you have 4 slots (field1 to field4)
-    for (let i = 1; i <= 4; i++) {
-      const value = latest[`field${i}`];
-      const slot = document.getElementById(`slot${i}`);
-      if (value === "1") {
-        slot.classList.add("occupied");
-      } else {
-        slot.classList.remove("occupied");
-      }
+  slots.forEach((val, index) => {
+    const el = slotElements[index];
+    if (val === 1) {
+      el.classList.add('occupied');
+      el.classList.remove('vacated');
+      occupied++;
+    } else {
+      el.classList.remove('occupied');
+      el.classList.add('vacated');
+      vacant++;
     }
+  });
 
+  document.getElementById("vacant-count").textContent = `Vacant: ${vacant}`;
+  document.getElementById("occupied-count").textContent = `Occupied: ${occupied}`;
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch(apiURL);
+    const data = await res.json();
+    updateDashboard(data);
   } catch (err) {
-    console.error("Error fetching data from ThingSpeak:", err);
+    console.error("Error fetching data:", err);
   }
 }
 
-// Initial fetch
-fetchParkingData();
-
-// Auto refresh every 15 seconds
-setInterval(fetchParkingData, 15000);
+// Fetch every 15 seconds
+fetchData();
+setInterval(fetchData, 15000);
