@@ -3,7 +3,7 @@ const apiURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json
 
 const slots = [
   document.getElementById('slot1'),
-  document.getElementById('slot2'),
+  document.getElementById('slot2')
 ];
 
 const car = document.getElementById('car');
@@ -12,71 +12,74 @@ const exitBarrier = document.getElementById('exit-barrier');
 const rfidText = document.getElementById('rfid-text');
 const rfidDot = document.querySelector('.dot');
 
-let lastStates = [0, 0]; // Only two slots
+let lastStates = [0, 0];
+
+function openBarrier(barrier) {
+  barrier.classList.add('open');
+  setTimeout(() => {
+    barrier.classList.remove('open');
+  }, 5000);
+}
 
 function animateCarTo(slotIndex) {
+  const slot = slots[slotIndex];
+  const rect = slot.getBoundingClientRect();
+
   car.style.display = 'block';
-  car.style.left = '50px';
+  car.style.top = '250px';
+  car.style.left = '-60px';
 
   setTimeout(() => {
-    const slot = slots[slotIndex];
-    const rect = slot.getBoundingClientRect();
+    openBarrier(entryBarrier);
+
     car.style.top = `${rect.top + window.scrollY + 20}px`;
     car.style.left = `${rect.left + window.scrollX + 30}px`;
 
     setTimeout(() => {
       car.style.display = 'none';
     }, 3000);
-  }, 100);
+  }, 300);
 }
 
-function moveCarToExit() {
-  // Move the car towards the exit
+function animateCarExit(slotIndex) {
+  const slot = slots[slotIndex];
+  const rect = slot.getBoundingClientRect();
+
   car.style.display = 'block';
-  car.style.left = `${window.innerWidth - 60}px`; // Move car towards the exit
+  car.style.top = `${rect.top + window.scrollY + 20}px`;
+  car.style.left = `${rect.left + window.scrollX + 30}px`;
 
   setTimeout(() => {
-    car.style.left = '-60px'; // Move the car out of view after 3 seconds
+    openBarrier(exitBarrier);
+    car.style.left = `${window.innerWidth + 100}px`;
 
     setTimeout(() => {
       car.style.display = 'none';
-    }, 1000);
-  }, 2000);
+    }, 3000);
+  }, 300);
 }
 
 function updateSlots(data) {
-  const states = [data.field1, data.field2].map(v => parseInt(v)); // Only two slots
+  const states = [parseInt(data.field1), parseInt(data.field2)];
   let vacant = 0, occupied = 0;
 
   states.forEach((val, idx) => {
     if (val === 1) {
-      if (lastStates[idx] === 0) animateCarTo(idx); // New car coming
+      if (lastStates[idx] === 0) {
+        animateCarTo(idx); // car just entered
+      }
       slots[idx].classList.add('occupied');
       occupied++;
     } else {
+      if (lastStates[idx] === 1) {
+        animateCarExit(idx); // car just exited
+      }
       slots[idx].classList.remove('occupied');
       vacant++;
-
-      if (lastStates[idx] === 1) {
-        // Car is leaving
-        moveCarToExit();
-        exitBarrier.classList.add('open');
-        setTimeout(() => {
-          exitBarrier.classList.remove('open');
-        }, 5000); // Close after 5 seconds
-      }
     }
   });
 
   lastStates = states;
-
-  // Animate entry barrier only when new car enters
-  if (occupied > 0) {
-    entryBarrier.classList.add('open');
-    setTimeout(() => {
-      entryBarrier.classList.remove('open');
-    }, 5000); // Close after 5 seconds
-  }
 
   rfidText.textContent = "✅ RFID Detected";
   rfidDot.style.backgroundColor = "#00ff00";
@@ -90,14 +93,16 @@ async function fetchData() {
     const res = await fetch(apiURL);
     if (!res.ok) throw new Error("Fetch failed");
     const data = await res.json();
-    updateSlots(data);
-  } catch (err) {
-    console.warn("Unable to connect to ThingSpeak");
 
+    if (data && (data.field1 !== null || data.field2 !== null)) {
+      updateSlots(data);
+    } else {
+      throw new Error("Invalid data received");
+    }
+  } catch (err) {
+    console.warn("Unable to connect to ThingSpeak", err);
     rfidText.textContent = "🛑 Connecting to server...";
     rfidDot.style.backgroundColor = "#a020f0";
-    entryBarrier.classList.remove('open');
-    exitBarrier.classList.remove('open');
   }
 }
 
