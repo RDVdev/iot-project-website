@@ -1,5 +1,5 @@
 const channelID = "2913872";
-const apiURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json`;
+const apiURL = `https://thingproxy.freeboard.io/fetch/https://api.thingspeak.com/channels/${channelID}/feeds/last.json`;
 
 const slots = [
   document.getElementById('slot1'),
