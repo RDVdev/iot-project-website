@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Virtual Smart Parking</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="lot">
+    <div class="gate-area" id="entry-gate">
+      <div class="barrier" id="entry-barrier"></div>
+      <div class="gate-label">ENTRY</div>
+    </div>
+
+    <div id="slots-area">
+      <div class="slot" id="slot1"></div>
+      <div class="slot" id="slot2"></div>
+    </div>
+
+    <div class="gate-area" id="exit-gate">
+      <div class="barrier" id="exit-barrier"></div>
+      <div class="gate-label">EXIT</div>
+    </div>
+  </div>
+
+  <div id="status-panel">
+    <div id="rfid-status">
+      <span class="dot"></span>
+      <span id="rfid-text">🔄 Waiting for RFID...</span>
+    </div>
+    <div id="vacant-count">Vacant: --</div>
+    <div id="occupied-count">Occupied: --</div>
+  </div>
+
+  <div id="car"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
