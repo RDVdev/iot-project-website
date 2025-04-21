@@ -1,5 +1,7 @@
+<script>
 const channelID = "2913872";
-const apiURL = `https://thingproxy.freeboard.io/fetch/https://api.thingspeak.com/channels/${channelID}/feeds/last.json`;
+const thingSpeakURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json`;
+const apiURL = `https://api.allorigins.win/get?url=${encodeURIComponent(thingSpeakURL)}`;
 
 const slots = [
   document.getElementById('slot1'),
@@ -92,7 +94,8 @@ async function fetchData() {
   try {
     const res = await fetch(apiURL);
     if (!res.ok) throw new Error("Fetch failed");
-    const data = await res.json();
+    const wrapped = await res.json();
+    const data = JSON.parse(wrapped.contents);
 
     if (data && (data.field1 !== null || data.field2 !== null)) {
       updateSlots(data);
@@ -108,3 +111,4 @@ async function fetchData() {
 
 fetchData();
 setInterval(fetchData, 15000);
+</script>
