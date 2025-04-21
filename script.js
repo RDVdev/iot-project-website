@@ -92,15 +92,16 @@ function updateSlots(data) {
 
 async function fetchData() {
   try {
-    const res = await fetch(apiURL);
-    if (!res.ok) throw new Error("Fetch failed");
-    const wrapped = await res.json();
-    const data = JSON.parse(wrapped.contents);
+    const response = await fetch(apiURL);
+    if (!response.ok) throw new Error("API fetch failed");
+
+    const proxyData = await response.json();
+    const data = JSON.parse(proxyData.contents); // <- This is the actual ThingSpeak JSON
 
     if (data && (data.field1 !== null || data.field2 !== null)) {
       updateSlots(data);
     } else {
-      throw new Error("Invalid data received");
+      throw new Error("Invalid ThingSpeak data");
     }
   } catch (err) {
     console.warn("Unable to connect to ThingSpeak", err);
